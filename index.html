@@ -623,7 +623,7 @@
 			let stateId = getUrlParameter('state');
 
 			// --- 1. HANDLE NO STATE PROVIDED (or invalid state) ---
-			if (stateId.length !== 2 || !stateNameMap[stateId]) {
+			//if (stateId.length !== 2 || !stateNameMap[stateId]) {
 				showStatePicker(); // Initial state: show the picker
 				
 				const stateGrid = $('#state-grid');
@@ -643,7 +643,8 @@
 					// Load data directly and update UI
 					fetchAndRenderAlerts(selectedState, fullStateName);
 				});
-				
+			
+			if (stateId.length !== 2 || !stateNameMap[stateId]) {
 				return;
 			}
 			
