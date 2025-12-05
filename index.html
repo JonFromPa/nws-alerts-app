@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Active NWS Alerts by State</title>
+	<style>
+		/* --- CSS STYLES --- */
+		body {
+			background-color: #f4f4f4; /* Light gray background */
+			padding: 0; 
+			margin: 0; 
+			/* IMPORTANT: Removed padding-top: 80px; since the header is now sticky (in-flow) */
+			font-family: 'Inter', Arial, Helvetica, "San Serif";
+		}
+		
+		/* ======================================= */
+		/* STICKY HEADER IMPLEMENTATION */
+		/* ======================================= */
+		#app-header {
+			position: sticky; /* CHANGED: Header now sticks to the top when scrolling */
+			top: 0; /* The point where it stops scrolling */
+			left: 0;
+			right: 0; 
+			max-width: 800px; 
+			margin: 0 auto; /* Center the sticky element within the viewport */
+			background-color: #ecf0f1; /* Header background */
+			border-bottom: 2px solid #ccc;
+			z-index: 20; /* Ensure it's above all content */
+			box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+		}
+
+		#header-content-wrapper {
+			/* This now manages internal padding and flex layout within the fixed header element */
+			padding: 10px 20px; 
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+		}
+
+		/* --- STATE PICKER STYLES --- */
+		#state-picker {
+			max-width: 800px;
+			/* Removed margin-top, content flows right after the header */
+			margin: 0 auto 20px auto; 
+			padding: 20px;
+			background-color: white;
+			border-radius: 8px;
+			box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+			box-sizing: border-box;
+		}
+
+		#picker-title {
+			font-size: 24px;
+			font-weight: 700;
+			color: #2c3e50;
+			margin-bottom: 20px;
+			text-align: center;
+		}
+
+		#state-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); 
+			gap: 10px;
+		}
+
+		.state-button {
+			background-color: #3498db; 
+			color: white;
+			border: none;
+			padding: 15px 10px; 
+			font-size: 18px;
+			font-weight: 600;
+			border-radius: 6px;
+			cursor: pointer;
+			transition: background-color 0.15s, transform 0.15s;
+			user-select: none;
+			text-align: center;
+			box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+		}
+
+		.state-button:hover {
+			background-color: #2980b9;
+		}
+
+		.state-button:active {
+			background-color: #1a5276;
+			transform: scale(0.98);
+		}
+
+
+		/* --- MAIN TABLE STYLES --- */
+		table.root {
+			border-spacing: 0px 0px;
+			border-collapse: separate;
+			box-sizing: border-box;
+			display: table;
+			min-width: 230px;
+			width: 100%; 
+			max-width: 800px; 
+			/* Margin is correct for content following a sticky element */
+			margin: 0 auto 20px auto; 
+			box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+			border-radius: 8px;
+			overflow: hidden; 
+			background-color: white; 
+		}
+		
+		/* Remove all sticky/thead styles as the header is now outside */
+		.root thead {
+			display: none; 
+		}
+		
+		tbody.one {
+			display: table-row-group;
+		}
+		tr.one {
+			box-sizing: border-box;
+			display: table-row;
+			height: 35px;
+		}
+		td.one {
+			box-sizing: border-box; 
+			display: table-cell;
+			vertical-align: middle;
+			padding: 8px;
+		}
+		
+		/* --- ALERT CARD STYLES (No change) --- */
+		tr.alert-record { }
+
+		.alert-record-clickable { cursor: pointer; user-select: none; }
+		
+		td.alert-record-container {
+			width: 100%; 
+			box-sizing: border-box;
+			display: table-cell;
+			vertical-align: top;
+			padding: 7.5px 8px 7.5px 8px; 
+			background-color: #f4f4f4;
+		}
+
+		.alert-detail-wrapper {
+			width: 100%;
+			border-radius: 4px;
+			overflow: hidden;
+			border: 1px solid black; 
+			box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+			transition: box-shadow 0.15s ease-in-out;
+			box-sizing: border-box; 
+		}
+		
+		.alert-record-clickable:hover .alert-detail-wrapper {
+			box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+		}
+
+		.alert-summary-header {
+			display: flex; 
+			justify-content: space-between;
+			padding: 5px 10px 0px 10px;
+		}
+
+		.alert-summary-header-left {
+			flex-grow: 1;
+			font-family: 'Inter', Arial, Helvetica, "San Serif";
+			font-size: 16px;
+			font-weight: 700;
+		}
+		.alert-summary-header-right {
+			text-align: right;
+			font-family: 'Inter', Arial, Helvetica, "San Serif";
+			font-size: 13px;
+			font-weight: 400;
+			padding-left: 10px; 
+		}
+
+		.alert-summary-areas {
+			display: flex; 
+			justify-content: space-between;
+			align-items: flex-start; 
+			font-family: 'Inter', Arial, Helvetica, "San Serif";
+			font-size: 13px;
+			font-weight: 400;
+			padding: 5px 10px 10px 10px;
+		}
+
+		.alert-areas-text {
+			flex-grow: 1; 
+			padding-right: 10px; 
+			min-width: 0; 
+		}
+
+		a.recordBlueHeaders {
+			text-decoration: none;
+			transition: color 0.2s;
+		}
+		a.recordBlueHeaders:hover {
+			text-decoration: underline;
+		}
+		span.recordBlackHeaders {
+			font-weight: 700;
+		}
+		
+		.alert-description-content-div {
+			font-family: 'Inter', Arial, Helvetica, "San Serif";
+			font-size: 13px;
+			padding: 10px;
+			white-space: pre-wrap; 
+			text-align: left;
+			line-height: 1.4;
+			color: #444;
+			background-color: white; 
+			border-top: 1px solid rgba(0,0,0,0.1);
+		}
+		
+		/* --- SEVERITY COLORS --- */
+		.alert-extreme-text { color: #c0392b; }
+		.alert-severe-text { color: #e67e22; }
+		.alert-moderate-text { color: #2980b9; } 
+		.alert-default-text { color: black; } 
+
+		.alert-default-bg { background-color: #fcfcfc; } 
+		.alert-extreme-bg { background-color: #f8d7da; } 
+		.alert-severe-bg { background-color: #fff3cd; } 
+		.alert-moderate-bg { background-color: #e6f0ff; } 
+
+		/* --- UTILITY CLASSES --- */
+		.time-detail {
+			font-size: 11px;
+			font-weight: 400;
+			color: #6c757d;
+		}
+		.area-header-text {
+			color: #333;
+		}
+		.header-state-code {
+			color: #c0392b;
+			font-size: 14px;
+		}
+		.header-title-text {
+			color: black;
+			font-size: 18px;
+			font-weight: 700;
+		}
+		.footer-note-text {
+			color: #6c757d;
+		}
+		.expand-icon {
+			flex-shrink: 0; 
+			font-size: 18px;
+			line-height: 1;
+			transition: transform 0.3s;
+			margin-right: 5px; 
+			color: #6c757d;
+			align-self: center; 
+		}
+		.expanded .expand-icon {
+			transform: rotate(180deg);
+		}
+		
+		/* State Title and Change Link Wrapper */
+		#state-title-wrapper {
+			display: flex;
+			align-items: baseline;
+			flex-wrap: wrap; 
+		}
+		
+		/* Change Link Styling */
+		#change-state-link {
+			margin-left: 10px; 
+			font-size: 14px; 
+			color: #3498db;
+			text-decoration: none;
+			font-weight: 600;
+			white-space: nowrap;
+			transition: color 0.15s;
+		}
+		#change-state-link:hover {
+			color: #2980b9;
+			text-decoration: underline;
+		}
+
+
+		/* Responsive adjustments for mobile screens */
+		@media (max-width: 600px) {
+			body {
+				padding-top: 0; /* No padding needed for sticky header */
+			}
+			table.root, #state-picker {
+				width: 100vw;
+				margin-left: 0;
+				margin-right: 0;
+				border-radius: 0;
+			}
+			table.root {
+				margin-top: 0; 
+				margin-bottom: 0;
+			}
+			
+			/* Adjust fixed header for mobile (less padding, stack elements) */
+			#header-content-wrapper {
+				flex-direction: column;
+				align-items: flex-start;
+				padding: 8px 15px; 
+			}
+			#header-right {
+				font-size: 12px;
+				margin-top: 4px;
+			}
+			
+			/* Ensure the title wrapper doesn't break */
+			#state-title-wrapper {
+				flex-direction: column; 
+				align-items: flex-start;
+			}
+			#change-state-link {
+				margin-left: 0; 
+				margin-top: 4px; 
+			}
+			
+			/* Stack the alert title/urgency columns vertically on small screens */
+			.alert-summary-header {
+				flex-direction: column;
+				padding: 5px 10px 0px 10px;
+			}
+			.alert-summary-header-right {
+				text-align: left !important; 
+				padding: 0px 0px 5px 0px; 
+			}
+			.alert-summary-areas {
+				font-size: 12px;
+				padding: 5px 10px 8px 10px;
+			}
+			/* Tighten vertical spacing on mobile */
+			td.alert-record-container {
+				padding-bottom: 8px; 
+				padding-left: 0; 
+				padding-right: 0;
+				padding-top: 8px; 
+			}
+			/* Footer text adjustment */
+			#source-row td {
+				font-size: 12px;
+				text-align: left;
+			}
+
+			/* Mobile picker grid - switch to 2 columns */
+			#state-grid {
+				grid-template-columns: repeat(2, 1fr); 
+			}
+		}
+
+	</style>
+
+	<!-- 1. Include jQuery Library -->
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+	<!-- 2. Custom jQuery Script for NWS API Call -->
+	<script>
+		// Function to get a parameter from the URL query string
+		function getUrlParameter(name) {
+			name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+			const regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+			const results = regex.exec(location.search);
+			return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' ')).toUpperCase();
+		}
+
+		// Function to format the ISO timestamp to a human-readable format
+		function formatTime(isoTime) {
+			if (!isoTime) return 'Time Unknown';
+			try {
+				const date = new Date(isoTime);
+				
+				// Format: February 05 at 5:34 AM PST 
+				const options = { 
+					month: 'long', 
+					day: '2-digit', 
+					hour: 'numeric', 
+					minute: '2-digit', 
+					hour12: true, 
+					timeZoneName: 'short' 
+				};
+				
+				let formatted = new Intl.DateTimeFormat('en-US', options).format(date);
+				
+				// Capitalize the first letter of the month
+				formatted = formatted.replace(/\b[a-z]/g, char => char.toUpperCase());
+
+				return formatted;
+			} catch (e) {
+				console.error("Error formatting time:", e);
+				return 'Invalid Time';
+			}
+		}
+
+		// Function to handle the click event for alert expansion (delegated)
+		function handleAlertClick(e) {
+			// Check if the click originated from the external link (<a> tag)
+			if ($(e.target).closest('a.recordBlueHeaders').length) {
+				return; 
+			}
+
+			// 'this' refers to the clicked element, which is the div.alert-detail-wrapper
+			const $clickedWrapper = $(this);
+			
+			// Use .find() to safely and locally target the description div inside the wrapper
+			const descriptionDiv = $clickedWrapper.find('.alert-description-content-div');
+			
+			// 1. Collapse all other expanded alerts
+			// Find all wrappers that are expanded AND are NOT the one just clicked
+			$('.alert-detail-wrapper.expanded').not($clickedWrapper).each(function() {
+				const $otherWrapper = $(this);
+				$otherWrapper.removeClass('expanded');
+				$otherWrapper.find('.alert-description-content-div').slideUp(200);
+			});
+			
+			// 2. Toggle the state of the clicked alert
+			// Toggle the expanded class for icon rotation
+			$clickedWrapper.toggleClass('expanded');
+			
+			// slideToggle works reliably for expanding/collapsing
+			descriptionDiv.slideToggle(200);
+		}
+		
+		// Function to hide the alerts table and show the state selection grid
+		function showStatePicker() {
+			$('.root').hide();
+			$('#state-picker').show();
+			
+			// Clean up the alert container
+			$('#alerts-container').find('.alert-record, #loading-message, #error-message').remove();
+			
+			// Update the header placeholders in the STICKY HEADER
+			$('#state-title').html('Select a State');
+			$('#last-updated-time').text('---');
+			$('#change-state-link').hide();
+			$('#footer-state-note').text('Please select a state or territory to view alerts.');
+		}
+
+
+		// Function to fetch and render the alerts for a given state
+		function fetchAndRenderAlerts(stateId, fullStateName) {
+			// Target the alerts content body (the tbody)
+			const alertsContainer = $('#alerts-container');
+			// Cleanup step to remove the "No Active Alerts" row if it exists
+			alertsContainer.find('tr.record').remove(); 
+			
+			// 1. Reset UI State and prepare for new data
+			$('.root').show();
+			$('#state-picker').hide();
+			$('#change-state-link').show(); // Show the 'Change' link
+			
+			// Clear previous dynamic alerts (everything between #header-row and #source-row)
+			alertsContainer.find('.alert-record, #loading-message, #error-message').remove();
+			
+			// Add a loading message (inserted into the table body)
+			const loadingRow = $(`
+				<tr id="loading-message">
+					<td colspan="2" class="one" style="text-align: center; padding: 20px; color: #555; border-bottom: none; background-color: white;">
+						Fetching active weather alerts for ${fullStateName}...
+					</td>
+				</tr>
+			`);
+			alertsContainer.find('#source-row').before(loadingRow);
+
+			// Update the header title and loading time in the STICKY HEADER
+			$('#state-title').html(`Active Alerts for ${fullStateName} (<span class="header-state-code">${stateId}</span>)`);
+			$('#last-updated-time').text('Loading...');
+
+
+			const apiUrl = `https://api.weather.gov/alerts/active?area=${stateId}`;
+			const headers = {
+				'User-Agent': 'NWSAlertsByStateApp/1.0 (contact@example.com)'
+			};
+
+			// AJAX Call to the NWS API
+			$.ajax({
+				url: apiUrl,
+				headers: headers,
+				method: 'GET',
+				dataType: 'json',
+				success: function(data) {
+					const alertsList = data.features;
+					
+					// Safely retrieve the 'updated' timestamp
+					const lastUpdatedIso = data.updated; 
+					
+					// Format and display the last updated time.
+					const formattedUpdateTime = formatTime(lastUpdatedIso);
+					$('#last-updated-time').text(formattedUpdateTime);
+
+					// Remove the loading message
+					$('#loading-message').remove();
+					
+					// Update footer note
+					$('#footer-state-note').text(`Alerts displayed for ${fullStateName}. Click 'Change' to select a new state.`);
+					
+					// Handle case with no active alerts
+					if (alertsList.length === 0) {
+						const noAlertsHtml = `
+							<tr class="record">
+								<td colspan="2" class="alert-record-container" style="padding: 20px; text-align: center; font-family: 'Inter', Arial, Helvetica, 'San Serif'; font-size: 14px; color: #333; background-color: white;">
+									No active severe weather alerts currently in effect for ${fullStateName}.
+								</td>
+							</tr>
+						`;
+						alertsContainer.find('#source-row').before(noAlertsHtml);
+						return;
+					}
+
+					// Process and display each alert
+					alertsList.forEach(function(feature) {
+						const props = feature.properties;
+						const alertId = feature.id.split('/').pop(); 
+						const alertUrl = props.url || feature.id; 
+						const alertType = props.event || props.headline || 'Weather Alert';
+						const issueTime = formatTime(props.sent);
+						const expiryTime = formatTime(props.expires);
+						const urgency = props.urgency || 'Unknown';
+						const status = props.status || 'Actual';
+						const areaDesc = props.areaDesc || 'Area details not specified.';
+						
+						const description = (props.description || 'No description provided.').trim();
+
+						// Determine classes based on severity
+						let severityColorClass = 'alert-default-text';
+						let severityBgClass = 'alert-default-bg';
+						const severity = (props.severity || '').toLowerCase();
+						
+						if (severity.includes('extreme')) {
+							severityColorClass = 'alert-extreme-text';
+							severityBgClass = 'alert-extreme-bg';
+						} else if (severity.includes('severe')) {
+							severityColorClass = 'alert-severe-text';
+							severityBgClass = 'alert-severe-bg';
+						} else if (severity.includes('moderate')) {
+							severityColorClass = 'alert-moderate-text';
+							severityBgClass = 'alert-moderate-bg';
+						}
+
+						// Construct the HTML for a single alert record using DIVs
+						const alertHtml = `
+							<tr class="alert-record">
+								<td colspan="2" class="alert-record-container"> 
+									<!-- The entire alert card is the clickable area, contained within a single DIV -->
+									<div id="alert-detail-wrapper-${alertId}" class="alert-detail-wrapper ${severityBgClass} alert-record-clickable">
+										
+										<!-- Top Header Row (Flexbox) -->
+										<div class="alert-summary-header">
+											<div class="alert-summary-header-left">
+												<a border="0" href="${alertUrl}" target="_blank" class="recordBlueHeaders ${severityColorClass}">
+													${alertType} 
+												</a>
+												<div class="time-detail">Issued: ${issueTime}</div>
+												<div class="time-detail">Expires: ${expiryTime}</div>
+											</div>
+											<div class="alert-summary-header-right">
+												<span class="recordBlackHeaders">Urgency: </span>${urgency}<br>
+												<span class="recordBlackHeaders">Status: </span>${status}
+											</div>
+										</div>
+
+										<!-- Affected Areas Row (visible) - NOW A FLEX CONTAINER -->
+										<div class="alert-summary-areas">
+											<div class="alert-areas-text">
+												<span class="recordBlackHeaders area-header-text">Areas affected:</span> ${areaDesc}
+											</div>
+											<span class="expand-icon">&#9660;</span>
+										</div>
+										
+										<!-- Alert Description Content (Initially hidden with style="display: none;") -->
+										<div id="description-content-${alertId}" class="alert-description-content-div" style="display: none;">${description}</div>
+									</div>
+								</td>
+							</tr>
+						`;
+						
+						alertsContainer.find('#source-row').before(alertHtml);
+					});
+				},
+				error: function(jqXHR, textStatus, errorThrown) {
+					// Remove loading message and add error message
+					$('#loading-message').remove(); 
+					
+					const errorHtml = `
+						<tr id="error-message">
+							<td colspan="2" class="one" style="text-align: center; color: red; padding: 20px; border-bottom: none; background-color: white;">
+								Error fetching alerts for ${stateId}: ${textStatus}. Please check the state abbreviation.
+							</td>
+						</tr>
+					`;
+					alertsContainer.find('#source-row').before(errorHtml);
+					$('#last-updated-time').text('N/A (Error)');
+					$('#footer-state-note').text(`Error loading alerts for ${fullStateName}. Click 'Change' to try another state.`);
+				}
+			});
+		}
+
+
+		$(document).ready(function() {
+			const stateNameMap = {
+				'AL': 'Alabama', 'AK': 'Alaska', 'AZ': 'Arizona', 'AR': 'Arkansas', 'CA': 'California',
+				'CO': 'Colorado', 'CT': 'Connecticut', 'DE': 'Delaware', 'FL': 'Florida', 'GA': 'Georgia',
+				'HI': 'Hawaii', 'ID': 'Idaho', 'IL': 'Illinois', 'IN': 'Indiana', 'IA': 'Iowa',
+				'KS': 'Kansas', 'KY': 'Kentucky', 'LA': 'Louisiana', 'ME': 'Maine', 'MD': 'Maryland',
+				'MA': 'Massachusetts', 'MI': 'Michigan', 'MN': 'Minnesota', 'MS': 'Mississippi', 'MO': 'Missouri',
+				'MT': 'Montana', 'NE': 'Nebraska', 'NV': 'Nevada', 'NH': 'New Hampshire', 'NJ': 'New Jersey',
+				'NM': 'New Mexico', 'NY': 'New York', 'NC': 'North Carolina', 'ND': 'North Dakota', 'OH': 'Ohio',
+				'OK': 'Oklahoma', 'OR': 'Oregon', 'PA': 'Pennsylvania', 'RI': 'Rhode Island', 'SC': 'South Carolina',
+				'SD': 'South Dakota', 'TN': 'Tennessee', 'TX': 'Texas', 'UT': 'Utah', 'VT': 'Vermont',
+				'VA': 'Virginia', 'WA': 'Washington', 'WV': 'West Virginia', 'WI': 'Wisconsin', 'WY': 'Wyoming',
+				'DC': 'District of Columbia', 'PR': 'Puerto Rico', 'VI': 'US Virgin Islands', 'GU': 'Guam', 'AS': 'American Samoa'
+			};
+			
+			// CRITICAL: Attach delegated click handler for expanding alerts
+			$('#alerts-container').on('click', '.alert-record-clickable', handleAlertClick);
+			
+			// Attach click handler for the new 'Change' link
+			$('#change-state-link').on('click', function(e) {
+				e.preventDefault();
+				showStatePicker();
+			});
+
+			let stateId = getUrlParameter('state');
+
+			// --- 1. HANDLE NO STATE PROVIDED (or invalid state) ---
+			if (stateId.length !== 2 || !stateNameMap[stateId]) {
+				showStatePicker(); // Initial state: show the picker
+				
+				const stateGrid = $('#state-grid');
+				
+				// Populate the state grid with buttons (only once)
+				Object.keys(stateNameMap).sort().forEach(code => {
+					const stateName = stateNameMap[code];
+					const button = $(`<button class="state-button" data-state="${code}" title="${stateName}">${code}</button>`);
+					stateGrid.append(button);
+				});
+				
+				// Add click handler for the state buttons
+				$('.state-button').on('click', function() {
+					const selectedState = $(this).data('state');
+					const fullStateName = stateNameMap[selectedState];
+					
+					// Load data directly and update UI
+					fetchAndRenderAlerts(selectedState, fullStateName);
+				});
+				
+				return;
+			}
+			
+			// --- 2. HANDLE VALID STATE PROVIDED (Initial Load from URL) ---
+			
+			const fullStateName = stateNameMap[stateId];
+			fetchAndRenderAlerts(stateId, fullStateName);
+		});
+	</script>
+</head>
+<body>
+	<!-- ======================================= -->
+	<!-- STICKY HEADER STRIP (Now part of the scroll flow) -->
+	<!-- ======================================= -->
+	<header id="app-header">
+		<div id="header-content-wrapper">
+			<!-- Left side: Title and Change Link -->
+			<div id="header-left">
+				<div id="state-title-wrapper">
+					<span id="state-title" class="header-title-text">Loading Alerts...</span>
+					<a href="#" id="change-state-link" style="display: none;">Change</a>
+				</div>
+			</div>
+			<!-- Right side: Last Updated Time -->
+			<div id="header-right" style="text-align:right;">
+				<span class="recordBlackHeaders footer-note-text">Last Updated:</span> 
+				<span id="last-updated-time">...</span>
+			</div>
+		</div>
+	</header>
+	
+	<!-- New State Picker UI -->
+	<div id="state-picker" style="display: none;">
+		<div id="picker-title">Select a U.S. State or Territory</div>
+		<div id="state-grid">
+			<!-- State buttons will be generated here by JavaScript -->
+		</div>
+	</div>
+	
+	<!-- Main Content Table -->
+	<table border="0" cellspacing="0" class="root" style="display: none;"> 
+		
+		<!-- NO THEAD HERE - Header is handled by the fixed #app-header -->
+		
+		<tbody id="alerts-container" class="one"> <!-- Content body -->
+			
+			<!-- Dynamic Alert Records will be inserted here by jQuery -->
+
+			<!-- Footer Row - Shows Source Link -->
+			<tr id="source-row" class="one" style="background-color: #ecf0f1;">
+				<td valign="middle" colspan="2" style="font-size:10px;font-weight:400;vertical-align:middle;padding:8px 10px;">
+					<span class="recordBlackHeaders">Source:</span> National Weather Service (NWS) API (<a href="https://www.weather.gov/documentation/services-web-api" target="_blank">weather.gov/documentation/services-web-api</a>)
+					<br><span id="footer-state-note" class="footer-note-text">Please select a state or territory to view alerts.</span>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+</body>
+</html>
