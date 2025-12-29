@@ -14,7 +14,6 @@
 			background-color: #f4f4f4; /* Light gray background */
 			padding: 0; 
 			margin: 0; 
-			/* IMPORTANT: Removed padding-top: 80px; since the header is now sticky (in-flow) */
 			font-family: 'Inter', Arial, Helvetica, "San Serif";
 		}
 		
@@ -22,30 +21,150 @@
 		/* STICKY HEADER IMPLEMENTATION */
 		/* ======================================= */
 		#app-header {
-			position: sticky; /* CHANGED: Header now sticks to the top when scrolling */
-			top: 0; /* The point where it stops scrolling */
+			position: sticky; 
+			top: 0; 
 			left: 0;
 			right: 0; 
 			max-width: 800px; 
-			margin: 0 auto; /* Center the sticky element within the viewport */
-			background-color: #ecf0f1; /* Header background */
+			margin: 0 auto; 
+			background-color: #ecf0f1; 
 			border-bottom: 2px solid #ccc;
-			z-index: 20; /* Ensure it's above all content */
+			z-index: 20; 
 			box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 		}
 
 		#header-content-wrapper {
-			/* This now manages internal padding and flex layout within the fixed header element */
 			padding: 10px 20px; 
 			display: flex;
 			justify-content: space-between;
 			align-items: center;
 		}
 
+		/* ======================================= */
+		/* COUNTY FILTER STYLES (NEW - Collapsible) */
+		/* ======================================= */
+		#county-filter-container {
+			max-width: 800px;
+			margin: 10px auto 20px auto; 
+			padding: 15px 20px;
+			background-color: white;
+			border-radius: 8px;
+			box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+			box-sizing: border-box;
+			position: relative;
+			z-index: 10;
+		}
+		
+		/* Header that acts as the collapse trigger */
+		#filter-header {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			cursor: pointer;
+			padding-bottom: 5px; /* Space between header and content when open */
+		}
+
+		#filter-header:hover {
+			background-color: #f9f9f9;
+		}
+
+		#filter-label {
+			display: block;
+			font-weight: 600;
+			color: #333;
+			font-size: 16px;
+			cursor: inherit;
+		}
+		
+		/* !!! MODIFIED CSS TO ALLOW TEXT WRAPPING !!! */
+		#selected-counties-display {
+			font-size: 12px;
+			color: #555;
+			margin-top: 5px;
+			overflow: visible; /* Allow text to be visible */
+			white-space: normal; /* Allow text to wrap naturally */
+			max-width: 100%; /* Use full available width */
+			padding-right: 0;
+		}
+
+		#county-search-input {
+			width: 100%;
+			padding: 10px;
+			margin-bottom: 10px;
+			border: 1px solid #ccc;
+			border-radius: 4px;
+			box-sizing: border-box;
+			font-size: 16px;
+			transition: border-color 0.15s;
+		}
+
+		#county-search-input:focus {
+			border-color: #3498db;
+			outline: none;
+		}
+
+		#county-list-container {
+			border: 1px solid #eee;
+			border-radius: 4px;
+			background-color: #fcfcfc;
+		}
+
+		#county-list {
+			max-height: 200px; /* Make it scrollable */
+			overflow-y: auto;
+			padding: 8px;
+		}
+
+		.county-item {
+			display: flex;
+			align-items: center;
+			padding: 5px 0;
+			cursor: pointer;
+			user-select: none;
+			transition: background-color 0.1s;
+		}
+
+		.county-item:hover {
+			background-color: #f0f0f0;
+		}
+
+		.county-item input[type="checkbox"] {
+			margin-right: 10px;
+			transform: scale(1.1);
+		}
+
+		.county-item-text {
+			flex-grow: 1;
+			font-size: 14px;
+		}
+
+		#filter-actions {
+			display: flex;
+			justify-content: flex-end;
+			padding: 8px;
+			border-top: 1px solid #eee;
+		}
+
+		.filter-action-button {
+			background-color: #ecf0f1;
+			color: #2c3e50;
+			border: 1px solid #bdc3c7;
+			padding: 6px 12px;
+			margin-left: 8px;
+			border-radius: 4px;
+			cursor: pointer;
+			font-size: 13px;
+			transition: background-color 0.15s;
+		}
+
+		.filter-action-button:hover {
+			background-color: #dcdde1;
+		}
+
+
 		/* --- STATE PICKER STYLES --- */
 		#state-picker {
 			max-width: 800px;
-			/* Removed margin-top, content flows right after the header */
 			margin: 0 auto 20px auto; 
 			padding: 20px;
 			background-color: white;
@@ -102,7 +221,6 @@
 			min-width: 230px;
 			width: 100%; 
 			max-width: 800px; 
-			/* Margin is correct for content following a sticky element */
 			margin: 0 auto 20px auto; 
 			box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 			border-radius: 8px;
@@ -110,7 +228,6 @@
 			background-color: white; 
 		}
 		
-		/* Remove all sticky/thead styles as the header is now outside */
 		.root thead {
 			display: none; 
 		}
@@ -130,9 +247,7 @@
 			padding: 8px;
 		}
 		
-		/* --- ALERT CARD STYLES (No change) --- */
-		tr.alert-record { }
-
+		/* --- ALERT CARD STYLES --- */
 		.alert-record-clickable { cursor: pointer; user-select: none; }
 		
 		td.alert-record-container {
@@ -215,6 +330,8 @@
 			color: #444;
 			background-color: white; 
 			border-top: 1px solid rgba(0,0,0,0.1);
+			user-select: text; /* ALLOW TEXT SELECTION HERE */
+			cursor: initial;
 		}
 		
 		/* --- SEVERITY COLORS --- */
@@ -288,7 +405,7 @@
 		/* Responsive adjustments for mobile screens */
 		@media (max-width: 600px) {
 			body {
-				padding-top: 0; /* No padding needed for sticky header */
+				padding-top: 0; 
 			}
 			table.root, #state-picker {
 				width: 100vw;
@@ -352,6 +469,19 @@
 			#state-grid {
 				grid-template-columns: repeat(2, 1fr); 
 			}
+			
+			#county-filter-container {
+				width: 100vw;
+				margin-left: 0;
+				margin-right: 0;
+				border-radius: 0;
+				padding: 10px 15px;
+			}
+			
+			#selected-counties-display {
+				max-width: 100%;
+				padding-right: 0;
+			}
 		}
 
 	</style>
@@ -359,14 +489,113 @@
 	<!-- 1. Include jQuery Library -->
 	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-	<!-- 2. Custom jQuery Script for NWS API Call -->
+	<!-- 2. Custom jQuery Script for NWS API Call and Filtering -->
 	<script>
+		// --- Global State Variables ---
+		let rawAlerts = []; // Stores all fetched alerts for the state
+		let allCounties = new Set(); // Stores all unique county names found
+		let selectedCounties = new Set(); // Stores currently selected county names
+		let currentStateId = '';
+
+		// Helper to parse the areaDesc string (e.g., "Sacramento, CA; Placer, CA")
+		function extractCountiesFromAreaDesc(stateId, areaDesc) {
+			if (!areaDesc) return [];
+			
+			// NWS format is typically "County Name, XX" where XX is the state code.
+			const stateSuffix = `, ${stateId}`;
+			const parts = areaDesc.split(';');
+			
+			return parts.map(part => {
+				const trimmed = part.trim();
+				// If the part ends with the state suffix (e.g., ", CA"), remove it
+				if (trimmed.endsWith(stateSuffix)) {
+					return trimmed.substring(0, trimmed.length - stateSuffix.length).trim();
+				}
+				// Otherwise, return the whole part (may be a marine zone, etc., but we list it)
+				return trimmed; 
+			}).filter(name => name.length > 0);
+		}
+		
 		// Function to get a parameter from the URL query string
 		function getUrlParameter(name) {
 			name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
 			const regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
 			const results = regex.exec(location.search);
-			return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' ')).toUpperCase();
+			return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' ')); // Do not force uppercase here
+		}
+		
+		// Function to get a list of county names from the URL (comma separated)
+		function getCountyListFromUrl() {
+			const countiesParam = getUrlParameter('counties');
+			if (countiesParam) {
+				// Return an array of trimmed county names
+				return countiesParam.split(',').map(name => name.trim()).filter(name => name.length > 0);
+			}
+			return [];
+		}
+		
+		// Function to update the display of selected counties
+		function updateSelectedCountiesDisplay() {
+			const displayElement = $('#selected-counties-display');
+			if (allCounties.size === 0) {
+				displayElement.text('No counties found in active alerts.');
+				return;
+			}
+			
+			// Check if all available counties are selected
+			const allSelected = selectedCounties.size === allCounties.size;
+			
+			if (allSelected) {
+				displayElement.html(`All <strong>${allCounties.size}</strong> counties are selected.`);
+			} else if (selectedCounties.size === 0) {
+				displayElement.html('No counties selected. Alerts will be hidden.');
+			} else {
+				// Sort the selected counties for stable display
+				const sortedSelected = Array.from(selectedCounties).sort();
+				const displayList = sortedSelected.join(', ');
+				
+				// Display the green checkmark and list of selected counties
+				displayElement.html(`<strong style="color:green;">&#10003;</strong> ${displayList}`);
+			}
+		}
+
+		// Function to display a temporary message
+		function showTemporaryMessage(title, message, type = 'info') {
+			const $box = $('#message-box');
+			const $title = $('#message-box-title');
+			const $content = $('#message-box-content');
+			
+			// Set colors based on type
+			let bgColor, borderColor, textColor;
+			if (type === 'warning') {
+				bgColor = '#fff3cd'; // Light yellow
+				borderColor = '#ffeeba';
+				textColor = '#856404';
+			} else if (type === 'error') {
+				bgColor = '#f8d7da'; // Light red
+				borderColor = '#f5c6cb';
+				textColor = '#721c24';
+			} else { // info
+				bgColor = '#d1ecf1'; // Light blue
+				borderColor = '#bee5eb';
+				textColor = '#0c5460';
+			}
+			
+			$box.css({
+				'background-color': bgColor,
+				'border-color': borderColor,
+				'color': textColor
+			}).find('button').css('color', textColor);
+
+			$title.html(title);
+			$content.html(message);
+			
+			$box.fadeIn(300);
+			
+			// Auto-hide after 10 seconds
+			setTimeout(() => {
+				$box.fadeOut(300);
+			}, 10000);
 		}
 
 		// Function to format the ISO timestamp to a human-readable format
@@ -374,8 +603,6 @@
 			if (!isoTime) return 'Time Unknown';
 			try {
 				const date = new Date(isoTime);
-				
-				// Format: February 05 at 5:34 AM PST 
 				const options = { 
 					month: 'long', 
 					day: '2-digit', 
@@ -386,32 +613,31 @@
 				};
 				
 				let formatted = new Intl.DateTimeFormat('en-US', options).format(date);
-				
-				// Capitalize the first letter of the month
 				formatted = formatted.replace(/\b[a-z]/g, char => char.toUpperCase());
 
 				return formatted;
 			} catch (e) {
-				console.error("Error formatting time:", e);
 				return 'Invalid Time';
 			}
 		}
 
 		// Function to handle the click event for alert expansion (delegated)
 		function handleAlertClick(e) {
-			// Check if the click originated from the external link (<a> tag)
+			// If the user clicks inside the description content, they are likely trying to select text. 
+			// Do not collapse the alert in this case.
+			if ($(e.target).closest('.alert-description-content-div').length) {
+				return; 
+			}
+
+			// Do not toggle if a link was clicked
 			if ($(e.target).closest('a.recordBlueHeaders').length) {
 				return; 
 			}
 
-			// 'this' refers to the clicked element, which is the div.alert-detail-wrapper
 			const $clickedWrapper = $(this);
-			
-			// Use .find() to safely and locally target the description div inside the wrapper
 			const descriptionDiv = $clickedWrapper.find('.alert-description-content-div');
 			
 			// 1. Collapse all other expanded alerts
-			// Find all wrappers that are expanded AND are NOT the one just clicked
 			$('.alert-detail-wrapper.expanded').not($clickedWrapper).each(function() {
 				const $otherWrapper = $(this);
 				$otherWrapper.removeClass('expanded');
@@ -419,10 +645,7 @@
 			});
 			
 			// 2. Toggle the state of the clicked alert
-			// Toggle the expanded class for icon rotation
 			$clickedWrapper.toggleClass('expanded');
-			
-			// slideToggle works reliably for expanding/collapsing
 			descriptionDiv.slideToggle(200);
 		}
 		
@@ -430,34 +653,278 @@
 		function showStatePicker() {
 			$('.root').hide();
 			$('#state-picker').show();
+			$('#county-filter-container').hide(); // Hide filter when picker is shown
 			
-			// Clean up the alert container
+			// Reset global state
+			rawAlerts = [];
+			allCounties = new Set();
+			selectedCounties = new Set();
+			currentStateId = '';
+			
 			$('#alerts-container').find('.alert-record, #loading-message, #error-message').remove();
 			
-			// Update the header placeholders in the STICKY HEADER
+			// Update the header placeholders
 			$('#state-title').html('Select a State');
 			$('#last-updated-time').text('---');
 			$('#change-state-link').hide();
 			$('#footer-state-note').text('Please select a state or territory to view alerts.');
 		}
 
+		// Function to render the filtered alerts based on the current rawAlerts and selectedCounties
+		function filterAndRenderAlerts() {
+			const alertsContainer = $('#alerts-container');
+			// Clear all previous dynamic content except loading/error rows
+			alertsContainer.find('.alert-record, #no-alerts-message').remove();
+
+			// Determine which alerts to display
+			let alertsToDisplay = rawAlerts;
+			
+			const isFiltered = (selectedCounties.size !== allCounties.size);
+			
+			// Apply filter if the selection is not equivalent to "select all"
+			if (isFiltered) {
+				alertsToDisplay = rawAlerts.filter(feature => {
+					const areaDesc = feature.properties.areaDesc || '';
+					
+					// If no counties are selected, we show no alerts.
+					if (selectedCounties.size === 0) {
+						return false; 
+					}
+					
+					// Check if any of the selected counties are in the alert's areaDesc
+					return Array.from(selectedCounties).some(county => {
+						// Create a RegExp that is case-insensitive and looks for the county name
+						// NOTE: This logic relies on `areaDesc` containing the exact county name (e.g., "Sacramento, CA")
+						// and `selectedCounties` holding the exact county name (e.g., "Sacramento").
+						const countyRegex = new RegExp(`\\b${county.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&")}\\b`, 'i');
+						return countyRegex.test(areaDesc);
+					});
+				});
+			}
+			
+			// Update the selected counties display
+			updateSelectedCountiesDisplay();
+
+			// Handle case with no active alerts (after filtering or initially)
+			if (alertsToDisplay.length === 0) {
+				const message = rawAlerts.length === 0 
+					? `No active severe weather alerts found for ${currentStateId}.`
+					: `No alerts match the current county filter in ${currentStateId}.`;
+					
+				const noAlertsHtml = `
+					<tr id="no-alerts-message" class="record">
+						<td colspan="2" class="alert-record-container" style="padding: 20px; text-align: center; font-family: 'Inter', Arial, Helvetica, 'San Serif'; font-size: 14px; color: #333; background-color: white;">
+							${message}
+						</td>
+					</tr>
+				`;
+				alertsContainer.find('#source-row').before(noAlertsHtml);
+				return;
+			}
+
+			// Process and display each filtered alert
+			alertsToDisplay.forEach(function(feature) {
+				const props = feature.properties;
+				const alertId = feature.id.split('/').pop(); 
+				const alertUrl = props.url || feature.id; 
+				const alertType = props.event || props.headline || 'Weather Alert';
+				const issueTime = formatTime(props.sent);
+				const expiryTime = formatTime(props.expires);
+				const urgency = props.urgency || 'Unknown';
+				const status = props.status || 'Actual';
+				const areaDesc = props.areaDesc || 'Area details not specified.';
+				const description = (props.description || 'No description provided.').trim();
+
+				let severityColorClass = 'alert-default-text';
+				let severityBgClass = 'alert-default-bg';
+				const severity = (props.severity || '').toLowerCase();
+				
+				if (severity.includes('extreme')) {
+					severityColorClass = 'alert-extreme-text';
+					severityBgClass = 'alert-extreme-bg';
+				} else if (severity.includes('severe')) {
+					severityColorClass = 'alert-severe-text';
+					severityBgClass = 'alert-severe-bg';
+				} else if (severity.includes('moderate')) {
+					severityColorClass = 'alert-moderate-text';
+					severityBgClass = 'alert-moderate-bg';
+				}
+
+				const alertHtml = `
+					<tr class="alert-record">
+						<td colspan="2" class="alert-record-container"> 
+							<div id="alert-detail-wrapper-${alertId}" class="alert-detail-wrapper ${severityBgClass} alert-record-clickable">
+								<div class="alert-summary-header">
+									<div class="alert-summary-header-left">
+										<a border="0" href="${alertUrl}" target="_blank" class="recordBlueHeaders ${severityColorClass}">
+											${alertType} 
+										</a>
+										<div class="time-detail">Issued: ${issueTime}</div>
+										<div class="time-detail">Expires: ${expiryTime}</div>
+									</div>
+									<div class="alert-summary-header-right">
+										<span class="recordBlackHeaders">Urgency: </span>${urgency}<br>
+										<span class="recordBlackHeaders">Status: </span>${status}
+									</div>
+								</div>
+								<div class="alert-summary-areas">
+									<div class="alert-areas-text">
+										<span class="recordBlackHeaders area-header-text">Areas affected:</span> ${areaDesc}
+									</div>
+									<span class="expand-icon">&#9660;</span>
+								</div>
+								<div id="description-content-${alertId}" class="alert-description-content-div" style="display: none;">${description}</div>
+							</div>
+						</td>
+					</tr>
+				`;
+				
+				alertsContainer.find('#source-row').before(alertHtml);
+			});
+		}
+
+		// Function to populate the county filter list
+		function populateCountyFilter(stateId) {
+			const countyListDiv = $('#county-list');
+			countyListDiv.empty(); // Clear previous list
+			
+			// Reset and populate the global county set from rawAlerts
+			allCounties.clear();
+			
+			rawAlerts.forEach(feature => {
+				const counties = extractCountiesFromAreaDesc(stateId, feature.properties.areaDesc);
+				counties.forEach(county => allCounties.add(county));
+			});
+			
+			// Sort the counties and populate the checkbox list
+			const sortedCounties = Array.from(allCounties).sort();
+			
+			if (sortedCounties.length === 0) {
+				$('#county-filter-container').hide();
+				// Ensure display is updated even if hidden
+				updateSelectedCountiesDisplay(); 
+				return;
+			}
+			
+			$('#county-filter-container').show();
+			
+			// Set filter state to collapsed by default (MANDATORY UPDATE)
+			$('#county-collapsible-content').hide();
+			$('#filter-header').removeClass('expanded').addClass('collapsed');
+			
+			selectedCounties = new Set(allCounties); // Default to selecting all
+
+			sortedCounties.forEach(county => {
+				// Create a simple, safe ID for checkbox linking
+				const countyId = county.toLowerCase().replace(/[^a-z0-9]/g, '-'); 
+				// Checked status will be overridden later if URL filter is applied
+				const countyHtml = `
+					<label for="county-${countyId}" class="county-item county-item-visible" data-county="${county}">
+						<input type="checkbox" id="county-${countyId}" name="county" value="${county}" checked>
+						<span class="county-item-text">${county}</span>
+					</label>
+				`;
+				countyListDiv.append(countyHtml);
+			});
+			
+			// Initial display update
+			updateSelectedCountiesDisplay();
+		}
+		
+		// Function to apply county filters from the URL (NOW SUPPORTS PARTIAL MATCH)
+		function applyUrlFilters(stateId) {
+			const urlCountiesRaw = getCountyListFromUrl();
+			
+			// If no counties were provided in the URL, we stick with the default (all selected).
+			if (urlCountiesRaw.length === 0) {
+				return;
+			}
+			
+			const matchedCounties = new Set();
+			const allCountiesArray = Array.from(allCounties);
+			const unmatchedRawNames = new Set(urlCountiesRaw); // To track which input names didn't match
+
+			urlCountiesRaw.forEach(rawName => {
+				const normalizedFilter = rawName.toLowerCase().trim();
+				let foundMatchForThisFilter = false;
+
+				for (const actualCounty of allCountiesArray) {
+					const normalizedActual = actualCounty.toLowerCase();
+
+					// Partial match: If the normalized filter term is a substring of the actual county name
+					if (normalizedActual.includes(normalizedFilter)) {
+						matchedCounties.add(actualCounty);
+						foundMatchForThisFilter = true;
+					}
+				}
+				
+				// If we found at least one match for the rawName, remove it from the unmatched set
+				if (foundMatchForThisFilter) {
+					unmatchedRawNames.delete(rawName);
+				}
+			});
+
+
+			// CASE 1: ZERO MATCHES FOUND
+			if (matchedCounties.size === 0 && urlCountiesRaw.length > 0) {
+				// Revert to selecting all counties (showing all alerts)
+				selectedCounties = new Set(allCounties);
+
+				// Show alert
+				const missingList = Array.from(unmatchedRawNames).join(', ');
+				const message = `None of the county filter terms provided in the URL (e.g., <strong>${missingList}</strong>) yielded a match for active alerts in ${stateId}. Showing all alerts instead. (Partial matching is enabled.)`;
+
+				showTemporaryMessage('Warning: URL Filter Mismatch', message, 'warning');
+
+				// Update UI to reflect "select all" state
+				$('#county-list input[type="checkbox"]').prop('checked', true);
+				
+				// Keep collapsed
+				$('#county-collapsible-content').hide();
+				$('#filter-header').removeClass('expanded').addClass('collapsed');
+				
+			} else {
+				// CASE 2: ONE OR MORE MATCHES FOUND (Apply Filter)
+				
+				// Update the global selection set
+				selectedCounties.clear();
+				matchedCounties.forEach(county => selectedCounties.add(county));
+
+				// Update the checkboxes in the UI
+				$('#county-list .county-item').each(function() {
+					const countyName = $(this).data('county');
+					const isSelected = selectedCounties.has(countyName);
+					$(this).find('input[type="checkbox"]').prop('checked', isSelected);
+				});
+
+				// Optional: Soft warning for filter terms that didn't match anything
+				if (unmatchedRawNames.size > 0) {
+					const missingList = Array.from(unmatchedRawNames).join(', ');
+					const message = `Some URL county filter terms (e.g., <strong>${missingList}</strong>) did not match any active alerts. Applying filter only for matched counties.`;
+					showTemporaryMessage('Partial Match Warning', message, 'info');
+				}
+				
+				// Ensure filter content is visible (since a filter was applied)
+				// $('#county-collapsible-content').show();
+				// $('#filter-header').removeClass('collapsed').addClass('expanded');
+			}
+		}
 
 		// Function to fetch and render the alerts for a given state
 		function fetchAndRenderAlerts(stateId, fullStateName) {
-			// Target the alerts content body (the tbody)
+			currentStateId = stateId;
 			const alertsContainer = $('#alerts-container');
-			// Cleanup step to remove the "No Active Alerts" row if it exists
 			alertsContainer.find('tr.record').remove(); 
 			
 			// 1. Reset UI State and prepare for new data
 			$('.root').show();
 			$('#state-picker').hide();
-			$('#change-state-link').show(); // Show the 'Change' link
+			$('#change-state-link').show();
 			
-			// Clear previous dynamic alerts (everything between #header-row and #source-row)
-			alertsContainer.find('.alert-record, #loading-message, #error-message').remove();
+			// Clear previous dynamic alerts (except the source row)
+			alertsContainer.find('.alert-record, #loading-message, #error-message, #no-alerts-message').remove();
 			
-			// Add a loading message (inserted into the table body)
+			// Show loading message
 			const loadingRow = $(`
 				<tr id="loading-message">
 					<td colspan="2" class="one" style="text-align: center; padding: 20px; color: #555; border-bottom: none; background-color: white;">
@@ -484,7 +951,8 @@
 				method: 'GET',
 				dataType: 'json',
 				success: function(data) {
-					const alertsList = data.features;
+					// Store raw alerts globally
+					rawAlerts = data.features;
 					
 					// Safely retrieve the 'updated' timestamp
 					const lastUpdatedIso = data.updated; 
@@ -499,90 +967,20 @@
 					// Update footer note
 					$('#footer-state-note').text(`Alerts displayed for ${fullStateName}. Click 'Change' to select a new state.`);
 					
-					// Handle case with no active alerts
-					if (alertsList.length === 0) {
-						const noAlertsHtml = `
-							<tr class="record">
-								<td colspan="2" class="alert-record-container" style="padding: 20px; text-align: center; font-family: 'Inter', Arial, Helvetica, 'San Serif'; font-size: 14px; color: #333; background-color: white;">
-									No active severe weather alerts currently in effect for ${fullStateName}.
-								</td>
-							</tr>
-						`;
-						alertsContainer.find('#source-row').before(noAlertsHtml);
-						return;
-					}
-
-					// Process and display each alert
-					alertsList.forEach(function(feature) {
-						const props = feature.properties;
-						const alertId = feature.id.split('/').pop(); 
-						const alertUrl = props.url || feature.id; 
-						const alertType = props.event || props.headline || 'Weather Alert';
-						const issueTime = formatTime(props.sent);
-						const expiryTime = formatTime(props.expires);
-						const urgency = props.urgency || 'Unknown';
-						const status = props.status || 'Actual';
-						const areaDesc = props.areaDesc || 'Area details not specified.';
-						
-						const description = (props.description || 'No description provided.').trim();
-
-						// Determine classes based on severity
-						let severityColorClass = 'alert-default-text';
-						let severityBgClass = 'alert-default-bg';
-						const severity = (props.severity || '').toLowerCase();
-						
-						if (severity.includes('extreme')) {
-							severityColorClass = 'alert-extreme-text';
-							severityBgClass = 'alert-extreme-bg';
-						} else if (severity.includes('severe')) {
-							severityColorClass = 'alert-severe-text';
-							severityBgClass = 'alert-severe-bg';
-						} else if (severity.includes('moderate')) {
-							severityColorClass = 'alert-moderate-text';
-							severityBgClass = 'alert-moderate-bg';
-						}
-
-						// Construct the HTML for a single alert record using DIVs
-						const alertHtml = `
-							<tr class="alert-record">
-								<td colspan="2" class="alert-record-container"> 
-									<!-- The entire alert card is the clickable area, contained within a single DIV -->
-									<div id="alert-detail-wrapper-${alertId}" class="alert-detail-wrapper ${severityBgClass} alert-record-clickable">
-										
-										<!-- Top Header Row (Flexbox) -->
-										<div class="alert-summary-header">
-											<div class="alert-summary-header-left">
-												<a border="0" href="${alertUrl}" target="_blank" class="recordBlueHeaders ${severityColorClass}">
-													${alertType} 
-												</a>
-												<div class="time-detail">Issued: ${issueTime}</div>
-												<div class="time-detail">Expires: ${expiryTime}</div>
-											</div>
-											<div class="alert-summary-header-right">
-												<span class="recordBlackHeaders">Urgency: </span>${urgency}<br>
-												<span class="recordBlackHeaders">Status: </span>${status}
-											</div>
-										</div>
-
-										<!-- Affected Areas Row (visible) - NOW A FLEX CONTAINER -->
-										<div class="alert-summary-areas">
-											<div class="alert-areas-text">
-												<span class="recordBlackHeaders area-header-text">Areas affected:</span> ${areaDesc}
-											</div>
-											<span class="expand-icon">&#9660;</span>
-										</div>
-										
-										<!-- Alert Description Content (Initially hidden with style="display: none;") -->
-										<div id="description-content-${alertId}" class="alert-description-content-div" style="display: none;">${description}</div>
-									</div>
-								</td>
-							</tr>
-						`;
-						
-						alertsContainer.find('#source-row').before(alertHtml);
-					});
+					// 2. Populate County Filter and set default selection (all)
+					populateCountyFilter(stateId);
+					
+					// 2.5 Apply URL Filters (new step with partial matching)
+					applyUrlFilters(stateId);
+					
+					// 3. Render all alerts (now based on the initial selection set by applyUrlFilters)
+					filterAndRenderAlerts();
 				},
 				error: function(jqXHR, textStatus, errorThrown) {
+					// Reset and hide filter on error
+					rawAlerts = [];
+					$('#county-filter-container').hide();
+					
 					// Remove loading message and add error message
 					$('#loading-message').remove(); 
 					
@@ -616,19 +1014,101 @@
 				'DC': 'District of Columbia', 'PR': 'Puerto Rico', 'VI': 'US Virgin Islands', 'GU': 'Guam', 'AS': 'American Samoa'
 			};
 			
-			// CRITICAL: Attach delegated click handler for expanding alerts
+			// --- EVENT HANDLERS ---
+			
+			// 1. Alert Expansion Handler
 			$('#alerts-container').on('click', '.alert-record-clickable', handleAlertClick);
 			
-			// Attach click handler for the new 'Change' link
+			// 2. Change State Link Handler
 			$('#change-state-link').on('click', function(e) {
 				e.preventDefault();
 				showStatePicker();
 			});
+			
+			// 3. County Checkbox Change Handler (Delegated to #county-list)
+			$('#county-list').on('change', 'input[type="checkbox"]', function() {
+				const countyName = $(this).val();
+				if ($(this).is(':checked')) {
+					selectedCounties.add(countyName);
+				} else {
+					selectedCounties.delete(countyName);
+				}
+				filterAndRenderAlerts(); // Re-render alerts based on new selection and update display
+			});
+			
+			// 4. County Search Input Handler
+			$('#county-search-input').on('keyup', function() {
+				const searchText = $(this).val().toLowerCase();
+				$('#county-list .county-item').each(function() {
+					const countyName = $(this).data('county').toLowerCase();
+					if (countyName.includes(searchText)) {
+						$(this).removeClass('county-item-hidden').show();
+					} else {
+						$(this).addClass('county-item-hidden').hide();
+					}
+				});
+			});
+			
+			// 5. Select All Button Handler (Selects ALL visible counties)
+			$('#select-all-counties').on('click', function() {
+				// We update the selection based ONLY on currently visible counties.
+				
+				// Identify currently visible counties
+				const visibleCounties = new Set();
+				$('#county-list .county-item').each(function() {
+					if ($(this).is(':visible')) {
+						const countyName = $(this).data('county');
+						visibleCounties.add(countyName);
+						$(this).find('input[type="checkbox"]').prop('checked', true);
+					} else {
+						// Ensure non-visible counties retain their state in selectedCounties
+						// (Do nothing here, let the next step handle the merge)
+					}
+				});
+				
+				// Create the new selected set: Start with currently selected, then add all visible ones.
+				// For simplicity and clarity in this context, let's redefine the behavior:
+				// "Select All" means select ALL counties that are currently visible in the list.
+				
+				// Re-initialize selectedCounties based on the checked state of ALL elements.
+				selectedCounties.clear();
+				$('#county-list input[type="checkbox"]:checked').each(function() {
+					selectedCounties.add($(this).val());
+				});
+				
+				filterAndRenderAlerts();
+			});
+			
+			// 6. Deselect All Button Handler (Deselects ALL visible counties)
+			$('#clear-counties').on('click', function() {
+				// Iterate over all visible county items
+				$('#county-list .county-item').each(function() {
+					if ($(this).is(':visible')) {
+						const countyName = $(this).data('county');
+						selectedCounties.delete(countyName);
+						$(this).find('input[type="checkbox"]').prop('checked', false);
+					}
+				});
+				filterAndRenderAlerts();
+			});
+			
+			// 7. County Filter Collapse Toggle Handler (MODIFIED)
+			$('#county-filter-container').on('click', '#filter-header', function(e) {
+				// Click on the entire header now triggers the toggle.
+				const $content = $('#county-collapsible-content');
+				const $header = $(this);
+				
+				$content.slideToggle(300, function() {
+					// Toggle the class on the header when animation is complete
+					$header.toggleClass('expanded').toggleClass('collapsed');
+				});
+			});
 
-			let stateId = getUrlParameter('state');
 
-			// --- 1. HANDLE NO STATE PROVIDED (or invalid state) ---
-			//if (stateId.length !== 2 || !stateNameMap[stateId]) {
+			// --- INITIAL LOAD LOGIC ---
+			let stateId = getUrlParameter('state').toUpperCase(); // Ensure state ID is uppercase
+
+			if (stateId.length !== 2 || !stateNameMap[stateId]) {
 				showStatePicker(); // Initial state: show the picker
 				
 				const stateGrid = $('#state-grid');
@@ -648,21 +1128,27 @@
 					// Load data directly and update UI
 					fetchAndRenderAlerts(selectedState, fullStateName);
 				});
-			
-			if (stateId.length !== 2 || !stateNameMap[stateId]) {
+				
 				return;
 			}
 			
-			// --- 2. HANDLE VALID STATE PROVIDED (Initial Load from URL) ---
-			
+			// Handle valid state provided (Initial Load from URL)
 			const fullStateName = stateNameMap[stateId];
 			fetchAndRenderAlerts(stateId, fullStateName);
 		});
 	</script>
 </head>
 <body>
+	
+	<!-- Custom Message Box UI (for warnings/errors) -->
+	<div id="message-box" style="position: fixed; top: 70px; left: 50%; transform: translateX(-50%); z-index: 1000; width: 90%; max-width: 450px; background-color: #d1ecf1; border: 1px solid #bee5eb; color: #0c5460; padding: 15px; border-radius: 5px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); display: none; font-size: 14px;">
+		<div style="font-weight: bold; margin-bottom: 5px;" id="message-box-title"></div>
+		<div id="message-box-content"></div>
+		<button onclick="$('#message-box').fadeOut(300);" style="position: absolute; top: 5px; right: 10px; background: none; border: none; font-size: 18px; cursor: pointer; color: inherit;">&times;</button>
+	</div>
+	
 	<!-- ======================================= -->
-	<!-- STICKY HEADER STRIP (Now part of the scroll flow) -->
+	<!-- STICKY HEADER STRIP -->
 	<!-- ======================================= -->
 	<header id="app-header">
 		<div id="header-content-wrapper">
@@ -681,6 +1167,40 @@
 		</div>
 	</header>
 	
+	<!-- ======================================= -->
+	<!-- COUNTY FILTER (NEW) -->
+	<!-- ======================================= -->
+	<div id="county-filter-container" style="display: none;">
+		<div id="filter-wrapper">
+			
+			<!-- COLLAPSIBLE HEADER / CLICKABLE TOGGLE -->
+			<div id="filter-header" class="collapsed">
+				<div style="flex-grow: 1;">
+					<label for="county-search-input" id="filter-label">Filter Alerts by County</label>
+					<!-- Selected Counties Display (Shows count and comma-separated list) -->
+					<div id="selected-counties-display">Loading counties...</div>
+				</div>
+				<span id="filter-toggle-icon" class="expand-icon">&#9660;</span>
+			</div>
+			
+			<!-- COLLAPSIBLE CONTENT (Collapsed by default in JS) -->
+			<div id="county-collapsible-content" style="display: none;">
+				<input type="text" id="county-search-input" placeholder="Search for county or select below..." />
+				<div id="county-list-container">
+					<div id="county-list">
+						<!-- County checkboxes populated here by JavaScript -->
+					</div>
+					<div id="filter-actions">
+						<button id="select-all-counties" class="filter-action-button">Select All</button>
+						<button id="clear-counties" class="filter-action-button">Deselect All</button>
+					</div>
+				</div>
+			</div>
+			
+		</div>
+	</div>
+
+	
 	<!-- New State Picker UI -->
 	<div id="state-picker" style="display: none;">
 		<div id="picker-title">Select a U.S. State or Territory</div>
@@ -691,9 +1211,6 @@
 	
 	<!-- Main Content Table -->
 	<table border="0" cellspacing="0" class="root" style="display: none;"> 
-		
-		<!-- NO THEAD HERE - Header is handled by the fixed #app-header -->
-		
 		<tbody id="alerts-container" class="one"> <!-- Content body -->
 			
 			<!-- Dynamic Alert Records will be inserted here by jQuery -->
@@ -709,4 +1226,3 @@
 	</table>
 </body>
 </html>
-
