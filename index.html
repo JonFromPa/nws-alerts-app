@@ -737,6 +737,9 @@
 
 				let severityColorClass = 'alert-default-text';
 				let severityBgClass = 'alert-default-bg';
+
+				let doShowAlert = true;
+				
 				const severity = (props.severity || '').toLowerCase();
 				
 				if (severity.includes('extreme')) {
@@ -750,36 +753,42 @@
 					severityBgClass = 'alert-moderate-bg';
 				}
 
-				const alertHtml = `
-					<tr class="alert-record">
-						<td colspan="2" class="alert-record-container"> 
-							<div id="alert-detail-wrapper-${alertId}" class="alert-detail-wrapper ${severityBgClass} alert-record-clickable">
-								<div class="alert-summary-header">
-									<div class="alert-summary-header-left">
-										<a border="0" href="${alertUrl}" target="_blank" class="recordBlueHeaders ${severityColorClass}">
-											${alertType} 
-										</a>
-										<div class="time-detail">Issued: ${issueTime}</div>
-										<div class="time-detail">Expires: ${expiryTime}</div>
+				if (status == 'Test'){
+					doShowAlert = false;
+				}
+
+				if(doShowAlert){
+					const alertHtml = `
+						<tr class="alert-record">
+							<td colspan="2" class="alert-record-container"> 
+								<div id="alert-detail-wrapper-${alertId}" class="alert-detail-wrapper ${severityBgClass} alert-record-clickable">
+									<div class="alert-summary-header">
+										<div class="alert-summary-header-left">
+											<a border="0" href="${alertUrl}" target="_blank" class="recordBlueHeaders ${severityColorClass}">
+												${alertType} 
+											</a>
+											<div class="time-detail">Issued: ${issueTime}</div>
+											<div class="time-detail">Expires: ${expiryTime}</div>
+										</div>
+										<div class="alert-summary-header-right">
+											<span class="recordBlackHeaders">Urgency: </span>${urgency}<br>
+											<span class="recordBlackHeaders">Status: </span>${status}
+										</div>
 									</div>
-									<div class="alert-summary-header-right">
-										<span class="recordBlackHeaders">Urgency: </span>${urgency}<br>
-										<span class="recordBlackHeaders">Status: </span>${status}
+									<div class="alert-summary-areas">
+										<div class="alert-areas-text">
+											<span class="recordBlackHeaders area-header-text">Areas affected:</span> ${areaDesc}
+										</div>
+										<span class="expand-icon">&#9660;</span>
 									</div>
+									<div id="description-content-${alertId}" class="alert-description-content-div" style="display: none;">${description}</div>
 								</div>
-								<div class="alert-summary-areas">
-									<div class="alert-areas-text">
-										<span class="recordBlackHeaders area-header-text">Areas affected:</span> ${areaDesc}
-									</div>
-									<span class="expand-icon">&#9660;</span>
-								</div>
-								<div id="description-content-${alertId}" class="alert-description-content-div" style="display: none;">${description}</div>
-							</div>
-						</td>
-					</tr>
-				`;
-				
-				alertsContainer.find('#source-row').before(alertHtml);
+							</td>
+						</tr>
+					`;
+					
+					alertsContainer.find('#source-row').before(alertHtml);
+				} // end if(doShowAlert){...}
 			});
 		}
 
@@ -1226,3 +1235,4 @@
 	</table>
 </body>
 </html>
+
